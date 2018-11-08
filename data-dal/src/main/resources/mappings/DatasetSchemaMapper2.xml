@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.quarkdata.data.dal.dao.DatasetSchemaMapper2">
+    <resultMap id="BaseResultMap" type="com.quarkdata.data.model.dataobj.DatasetSchema">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="dataset_id" jdbcType="BIGINT" property="datasetId"/>
+        <result column="column_name" jdbcType="VARCHAR" property="columnName"/>
+        <result column="column_type" jdbcType="CHAR" property="columnType"/>
+        <result column="column_length" jdbcType="INTEGER" property="columnLength"/>
+        <result column="column_comment" jdbcType="VARCHAR" property="columnComment"/>
+        <result column="meaning" jdbcType="CHAR" property="meaning"/>
+        <result column="sub_meaning" jdbcType="CHAR" property="subMeaning"/>
+        <result column="proportion" jdbcType="REAL" property="proportion"/>
+    </resultMap>
+
+    <select id="getColumnNames" parameterType="java.lang.Long" resultType="java.lang.String">
+        select
+            column_name
+        from dataset_schema
+        where dataset_id = #{dataSetId,jdbcType=BIGINT}
+        order by id
+   </select>
+
+    <select id="getColumnType" parameterType="map" resultType="java.lang.String">
+        select
+            column_type
+        from dataset_schema
+        where dataset_id = #{dataSetId,jdbcType=BIGINT} and column_name = #{columnName}
+   </select>
+</mapper>

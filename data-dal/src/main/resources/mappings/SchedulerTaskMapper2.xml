@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.quarkdata.data.dal.dao.SchedulerTaskMapper2">
+  <resultMap id="BaseResultMap" type="com.quarkdata.data.model.vo.SchedulerTaskVO">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="job_name" jdbcType="VARCHAR" property="taskName" />
+    <result column="task_status" jdbcType="CHAR" property="taskStatus" />
+    <result column="start_time" jdbcType="TIMESTAMP" property="startTime" />
+    <result column="end_time" jdbcType="TIMESTAMP" property="endTime" />
+    <result column="retry_times" jdbcType="INTEGER" property="retryTimes" />
+    <result column="alarm_time" jdbcType="TIMESTAMP" property="scheduleDatetime"/>
+    <result column="biz_date_param" jdbcType="VARCHAR" property="bizDate" />
+    <collection property="users"
+			ofType="com.quarkdata.data.model.dataobj.SchedulerJobResponsible">
+		<id property="userId" jdbcType="BIGINT" column="user_id" />
+		<result property="userName" column="user_name" jdbcType="VARCHAR" />
+	</collection>
+  </resultMap>
+  <select id="getTaskList" parameterType="map" resultMap="BaseResultMap">
+    SELECT
+    t.id,
+	j.tenant_id,
+	j.job_name,
+	t.task_status,
+	t.start_time,
+	t.end_time,
+	t.biz_date_param,
+	t.retry_times,
+	t.alarm_time,
+	group_concat(CONCAT_WS(':',res.user_name,res.user_id)) user_name
+	FROM
+		scheduler_task t
+	LEFT JOIN scheduler_job j ON t.scheduler_job_id = j.id
+	LEFT JOIN scheduler_job_responsible res ON res.scheduler_job_id = j.id
+	WHERE
+		j.tenant_id = #{tenantId}
+		AND t.project_id = #{projectId}
+	<if test="jobId != null">
+		AND t.scheduler_job_id = #{jobId}
+	</if>
+	<if test="name !=null and name != ''">
+		AND j.job_name LIKE '%${name}%'
+	</if>
+	<if test="taskStatus != null and taskStatus != ''">
+		AND t.task_status = #{taskStatus}
+	</if>
+	<if test="isManual != null and isManual != ''">
+		AND	t.is_manual = #{isManual}
+	</if>
+	<if test="bizDate !=null and bizDate != ''">
+		AND t.biz_date_param = #{bizDate}
+	</if>
+	<if test="userId != null">
+		AND res.user_id = #{userId}
+	</if>
+	GROUP BY t.id
+	ORDER BY t.create_time desc
+	limit #{pageNum},#{pageSize}
+  </select>
+  <select id="getTaskListCount" parameterType="map" resultType="java.lang.Long">
+	  SELECT COUNT(*) FROM (
+	  SELECT
+	  GROUP_CONCAT(res.user_name) user_name
+	  FROM
+	  scheduler_task t
+	  LEFT JOIN scheduler_job j ON t.scheduler_job_id = j.id
+	  LEFT JOIN scheduler_job_responsible res ON res.scheduler_job_id = j.id
+	  WHERE
+	  j.tenant_id = #{tenantId}
+	  AND t.project_id = #{projectId}
+	  <if test="jobId != null">
+		  AND t.scheduler_job_id = #{jobId}
+	  </if>
+	  <if test="name !=null and name != ''">
+		  AND j.job_name LIKE '%${name}%'
+	  </if>
+	  <if test="taskStatus != null and taskStatus != ''">
+		  AND t.task_status = #{taskStatus}
+	  </if>
+	  <if test="isManual != null and isManual != ''">
+		  AND	t.is_manual = #{isManual}
+	  </if>
+	  <if test="bizDate !=null and bizDate != ''">
+		  AND t.biz_date_param = #{bizDate}
+	  </if>
+	  <if test="userId != null">
+		  AND res.user_id = #{userId}
+	  </if>
+	  GROUP BY t.id) usecount
+  </select>
+	<delete id="deleteByJobId" parameterType="map">
+		delete from scheduler_task where scheduler_job_id=#{jobId}
+	</delete>
+	<select id="getcantDelTasknumber" parameterType="map" resultType="java.lang.Long">
+		select COUNT(*) from scheduler_task where scheduler_job_id = #{jobId} AND (task_status=#{statusOne} OR task_status=#{statusTwo} )
+	</select>
+	<select id="getcantDelTask" parameterType="map" resultType="java.lang.Long">
+		select COUNT(*) from scheduler_task where id = #{taskId} AND (task_status=#{statusOne} OR task_status=#{statusTwo} )
+	</select>
+</mapper>

@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.quarkdata.data.dal.dao.DatasetMapper2">
+  <resultMap id="BaseResultMap" type="com.quarkdata.data.model.dataobj.Dataset">
+      <id column="id" jdbcType="BIGINT" property="id" />
+      <result column="datasource_id" jdbcType="BIGINT" property="datasourceId" />
+      <result column="project_id" jdbcType="BIGINT" property="projectId" />
+      <result column="dataset_name" jdbcType="VARCHAR" property="datasetName" />
+      <result column="table_name" jdbcType="VARCHAR" property="tableName" />
+      <result column="is_write" jdbcType="CHAR" property="isWrite" />
+      <result column="is_sync" jdbcType="CHAR" property="isSync" />
+      <result column="is_float_to_int" jdbcType="CHAR" property="isFloatToInt" />
+      <result column="sample_type" jdbcType="CHAR" property="sampleType" />
+      <result column="sample_type_value" jdbcType="INTEGER" property="sampleTypeValue" />
+      <result column="is_sample_filter" jdbcType="CHAR" property="isSampleFilter" />
+      <result column="sample_filter_type" jdbcType="CHAR" property="sampleFilterType" />
+      <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+      <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+      <result column="create_user" jdbcType="BIGINT" property="createUser" />
+      <result column="update_user" jdbcType="BIGINT" property="updateUser" />
+      <result column="sync_time" jdbcType="TIMESTAMP" property="syncTime" />
+      <result column="data_count" jdbcType="BIGINT" property="dataCount" />
+  </resultMap>
+  <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.quarkdata.data.model.dataobj.Dataset">
+    <result column="description" jdbcType="LONGVARCHAR" property="description" />
+  </resultMap>
+
+
+    <resultMap id="ListResultMap" type="com.quarkdata.data.model.vo.DataSetListVO">
+        <id column="id" jdbcType="BIGINT" property="id" />
+        <result column="dataset_name" jdbcType="VARCHAR" property="datasetName" />
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+        <result column="dataset_type" jdbcType="VARCHAR" property="datasetType" />
+    </resultMap>
+
+    <resultMap id="DetailResultMap" type="com.quarkdata.data.model.vo.DataSetDetailVO">
+        <id column="id" jdbcType="BIGINT" property="id" />
+        <result column="dataset_name" jdbcType="VARCHAR" property="datasetName" />
+        <result column="data_type" jdbcType="VARCHAR" property="dataType" />
+        <result column="description" jdbcType="VARCHAR" property="description" />
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+        <result column="sync_time" jdbcType="TIMESTAMP" property="syncTime" />
+        <result column="data_count" jdbcType="BIGINT" property="dataCount" />
+        <result column="workflow_id" jdbcType="BIGINT" property="workflowId" />
+        <result column="workflow_name" jdbcType="VARCHAR" property="workflowName" />
+    </resultMap>
+
+    <select id="datasetList" parameterType="map" resultMap="BaseResultMap">
+  	SELECT
+	id,
+	table_name
+	FROM
+		dataset
+	<where>
+		<if test="search != null and search != ''">
+			table_name LIKE '%${search}%'
+		</if>
+	</where>
+  </select>
+
+    <!--拉取数据集列表，用数据集名称、工作流id过滤-->
+    <select id="getDataSetList" parameterType="map" resultMap="ListResultMap">
+    SELECT
+        dataset.id,
+        dataset.dataset_name,
+        dataset.update_time,
+        datasource.data_type AS dataset_type
+    FROM
+        dataset dataset
+    LEFT JOIN
+        datasource datasource ON datasource.id = dataset.datasource_id
+    LEFT JOIN
+        workflow_node wknode ON wknode.dataset_id = dataset.id
+    WHERE
+        dataset.project_id = ${projectId} AND ( wknode.is_del IS NULL OR wknode.is_del = 0 )
+        <if test="filter != null and filter != ''">
+            AND dataset.dataset_name LIKE '%${filter}%'
+        </if>
+        <if test="workFlowId != null">
+            AND dataset.id IN (
+            SELECT
+                wfn.dataset_id
+            FROM
+                workflow_node wfn
+            WHERE
+                wfn.workflow_id = ${workFlowId})
+        </if>
+        ORDER BY dataset.update_time DESC
+    </select>
+
+
+    <select id="getDataSetDetail" parameterType="map" resultMap="DetailResultMap">
+    SELECT
+        dataset.id,
+        dataset.dataset_name,
+        dataset.update_time,
+        dataset.description,
+        dataset.create_time,
+        dataset.sync_time,
+        dataset.data_count,
+        wf.id as workflow_id,
+        wf.workflow_name,
+        datasource.data_type
+    FROM
+        dataset dataset
+            left join
+        datasource datasource ON datasource.id = dataset.datasource_id
+            left join
+        workflow_node wfn ON wfn.dataset_id = dataset.id
+            left join
+        workflow wf ON wf.id = wfn.workflow_id
+    where
+        dataset.id = ${dataSetId};
+    </select>
+
+    <select id="getDatasetInfo" parameterType="map" resultMap="ListResultMap">
+        select ds.id, ds.dataset_name,ds.update_time,
+        datasource.data_type as dataset_type
+        from dataset ds
+        left join datasource datasource ON datasource.id = ds.datasource_id
+        where ds.id in
+        <foreach collection="datasetIds" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        <if test="filter != null and filter.trim() != ''">
+            and (ds.dataset_name like concat('%',#{filter},'%'))
+        </if>
+        limit
+        #{start},#{size}
+    </select>
+
+    <select id="getDatasetInfo1" parameterType="map" resultMap="ListResultMap">
+        select ds.id, ds.dataset_name,ds.update_time,
+        datasource.data_type as dataset_type
+        from dataset ds
+        left join datasource datasource ON datasource.id = ds.datasource_id
+        where ds.id in
+        <foreach collection="datasetIds" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        <if test="filter != null and filter.trim() != ''">
+            and (ds.dataset_name like concat('%',#{filter},'%'))
+        </if>
+    </select>
+
+    <!--拉取数据集列表，用数据集名称、工作流id过滤-->
+    <select id="getOutputDatasetList" parameterType="map" resultMap="ListResultMap">
+        select
+        ds.id, ds.dataset_name,ds.update_time,
+        datasource.data_type as dataset_type
+        from
+        dataset ds
+        left join
+        datasource datasource ON datasource.id = ds.datasource_id
+        where
+        ds.project_id = ${projectId}
+        <if test="filter != null and filter != ''">
+            and ds.dataset_name like '%${filter}%'
+        </if>
+        and ds.table_name like '%${projectKey}%'
+        and ds.id in (select
+        wn.dataset_id
+        from
+        workflow_node wn
+        where
+        wn.is_del = 0
+        and wn.id not in (select
+        wnr.current_node_id
+        from
+        workflow_node_rel wnr
+        where
+        wnr.is_del = 0))
+        limit
+        #{start},#{size};
+    </select>
+
+    <!--拉取数据集列表，用数据集名称、工作流id过滤-->
+    <select id="getOutputDatasetList1" parameterType="map" resultMap="ListResultMap">
+        select
+        ds.id, ds.dataset_name,ds.update_time,
+        datasource.data_type as dataset_type
+        from
+        dataset ds
+        left join
+        datasource datasource ON datasource.id = ds.datasource_id
+        where
+        ds.project_id = ${projectId}
+        <if test="filter != null and filter != ''">
+            and ds.dataset_name like '%${filter}%'
+        </if>
+        and ds.table_name like '%${projectKey}%'
+        and ds.id in (select
+        wn.dataset_id
+        from
+        workflow_node wn
+        where
+        wn.is_del = 0
+        and wn.id not in (select
+        wnr.current_node_id
+        from
+        workflow_node_rel wnr
+        where
+        wnr.is_del = 0 and wnr.workflow_id = ${workFlowId}))
+    </select>
+</mapper>

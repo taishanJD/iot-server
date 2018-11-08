@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.quarkdata.data.dal.dao.SchedulerJobMapper2">
+    <resultMap id="BaseResultMapForSchedulerJob" type="com.quarkdata.data.model.dataobj.SchedulerJob">
+        <id column="id" jdbcType="BIGINT" property="id" />
+        <result column="tenant_id" jdbcType="BIGINT" property="tenantId" />
+        <result column="job_name" jdbcType="VARCHAR" property="jobName" />
+        <result column="job_type" jdbcType="CHAR" property="jobType" />
+        <result column="job_biz_type" jdbcType="CHAR" property="jobBizType" />
+        <result column="job_biz_id" jdbcType="BIGINT" property="jobBizId" />
+        <result column="is_frozen" jdbcType="CHAR" property="isFrozen" />
+        <result column="is_notify" jdbcType="CHAR" property="isNotify" />
+        <result column="is_publish" jdbcType="CHAR" property="isPublish" />
+        <result column="interval_type" jdbcType="CHAR" property="intervalType" />
+        <result column="interval_values" jdbcType="VARCHAR" property="intervalValues" />
+        <result column="interval_hour" jdbcType="INTEGER" property="intervalHour" />
+        <result column="interval_minute" jdbcType="INTEGER" property="intervalMinute" />
+        <result column="valid_startdate" jdbcType="TIMESTAMP" property="validStartdate" />
+        <result column="valid_enddate" jdbcType="TIMESTAMP" property="validEnddate" />
+        <result column="start_hour" jdbcType="INTEGER" property="startHour" />
+        <result column="start_minute" jdbcType="INTEGER" property="startMinute" />
+        <result column="end_hour" jdbcType="INTEGER" property="endHour" />
+        <result column="end_minute" jdbcType="INTEGER" property="endMinute" />
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+        <result column="create_user" jdbcType="BIGINT" property="createUser" />
+        <result column="update_user" jdbcType="BIGINT" property="updateUser" />
+        <result column="is_del" jdbcType="CHAR" property="isDel" />
+    </resultMap>
+    <sql id="BaseColumn">
+       id, tenant_id, job_name, job_type, job_biz_type, job_biz_id, is_frozen, is_notify, is_publish, interval_type, interval_values, interval_hour,
+       interval_minute, valid_startdate, valid_enddate, start_hour, start_minute, end_hour, end_minute, create_time, update_time, create_user,
+       update_user
+    </sql>
+    <select id="getJobListByProjectId" parameterType="map" resultMap="BaseResultMapForSchedulerJob">
+        SELECT sj.id, sj.tenant_id, sj.job_name, sj.job_type, sj.job_biz_type, sj.job_biz_id, sj.is_frozen, sj.is_notify, sj.is_publish, sj.interval_type, sj.interval_values, sj.interval_hour,
+       sj.interval_minute, sj.valid_startdate, sj.valid_enddate, sj.start_hour, sj.start_minute, sj.end_hour, sj.end_minute, sj.create_time, sj.update_time, sj.create_user,
+       sj.update_user
+        FROM workflow wk
+        LEFT JOIN scheduler_job sj ON wk.scheduler_job_id = sj.id
+        WHERE wk.tenant_id = #{tenantId} AND wk.project_id = #{projectId} AND wk.is_del = '0' AND sj.is_publish = '1' AND sj.is_del = '0'
+        LIMIT #{limitStart} , #{limitEnd}
+    </select>
+
+    <select id="getJobCountByProjectId" parameterType="map" resultType="int">
+        SELECT COUNT(*)
+        FROM workflow wk
+        LEFT JOIN scheduler_job sj ON wk.scheduler_job_id = sj.id
+        WHERE wk.tenant_id = #{tenantId} AND wk.project_id = #{projectId} AND wk.is_del = '0' AND sj.is_publish = '1'
+    </select>
+
+  <select id="getJobList" parameterType="map" resultMap="BaseResultMapForSchedulerJob">
+  	SELECT
+	job.id,
+	f.workflow_name,
+	job.update_time
+	FROM
+		scheduler_job job
+	INNER JOIN workflow f ON job.tenant_id = #{tenantId}
+	AND job.id = f.scheduler_job_id
+	<where>
+		<if test="search != null and search != ''">
+			f.workflow_name LIKE '%${search}%'
+		</if>
+	</where>
+  </select>
+    <update id="deleteJob" parameterType="map">
+        UPDATE scheduler_job SET is_del='1',is_publish='0' WHERE id=#{jobId}
+    </update>
+</mapper>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:util="http://www.springframework.org/schema/util"
+	   xmlns:mongo="http://www.springframework.org/schema/data/mongo"
+	   xsi:schemaLocation="
+		http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+		http://www.springframework.org/schema/util
+        http://www.springframework.org/schema/util/spring-util-3.2.xsd
+        http://www.springframework.org/schema/data/mongo 
+        http://www.springframework.org/schema/data/mongo/spring-mongo.xsd"
+	default-lazy-init="true">
+
+	<description>mongo Configuration</description>
+
+    <!-- 加载配置属性文件 -->
+	<util:properties id="properties" location="classpath:config/config.properties"></util:properties>
+
+	<!--提供自动注入配置的扫描包-->
+<!--     <context:component-scan base-package="com.quarkdata.data"/> -->
+
+    <!-- <context:property-placeholder location="classpath:mongo.properties" file-encoding="utf-8"/> -->
+
+    <!--
+    1.mongo：连接配置
+    2.db-factory：相当于sessionFactory
+    3.mongoTemplate：与数据库接口交互的主要实现类
+    -->
+    
+    <!--连接池配置-->
+    <mongo:mongo-client id="mongo" host="${mongo.host}" port="${mongo.port}" credentials="${mongo.username}:${mongo.password}@${mongo.dbname}">
+        <mongo:client-options connections-per-host="${mongo.options.connections-per-host}"
+                       threads-allowed-to-block-for-connection-multiplier="${mongo.options.threads-allowed-to-block-for-connection-multiplier}"
+                       connect-timeout="${mongo.options.connect-timeout}"
+                       max-wait-time="${mongo.options.max-wait-time}"
+                       socket-keep-alive="${mongo.options.socket-keep-alive}"
+                       socket-timeout="${mongo.options.socket-timeout}"/>
+    </mongo:mongo-client>
+    <!--连接池工厂配置--> <!-- username="${mongo.username}" password="${mongo.password}" -->
+    <mongo:db-factory id="mongoDbFactory" dbname="${mongo.dbname}" write-concern="SAFE" mongo-ref="mongo"/>
+    <bean id="mongoTemplate" class="org.springframework.data.mongodb.core.MongoTemplate">
+        <constructor-arg name="mongoDbFactory" ref="mongoDbFactory"/>
+    </bean>
+    
+    <!--实体映射自动扫描注入的包-->
+    <mongo:mapping-converter>
+        <mongo:custom-converters base-package="com.quarkdata.data.model.mongo" />
+    </mongo:mapping-converter>
+
+    <!-- mongodb bean的仓库目录，会自动扫描扩展了MongoRepository接口的接口进行注入 -->
+    <mongo:repositories base-package="com.quarkdata.data.dal.mongoRepository" repository-impl-postfix="Impl"/>
+</beans>

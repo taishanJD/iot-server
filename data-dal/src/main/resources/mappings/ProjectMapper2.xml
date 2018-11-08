@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.quarkdata.data.dal.dao.ProjectMapper2">
+  <resultMap id="BaseResultMap" type="com.quarkdata.data.model.dataobj.Project">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="tenant_id" jdbcType="BIGINT" property="tenantId" />
+    <result column="project_name" jdbcType="VARCHAR" property="projectName" />
+    <result column="project_key" jdbcType="VARCHAR" property="projectKey" />
+    <result column="project_status" jdbcType="CHAR" property="projectStatus" />
+    <result column="project_info" jdbcType="VARCHAR" property="projectInfo" />
+    <result column="is_del" jdbcType="CHAR" property="isDel" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="create_user" jdbcType="BIGINT" property="createUser" />
+    <result column="update_user" jdbcType="BIGINT" property="updateUser" />
+  </resultMap>
+  <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.quarkdata.data.model.dataobj.ProjectWithBLOBs">
+    <result column="project_desc" jdbcType="LONGVARCHAR" property="projectDesc" />
+    <result column="project_picture" jdbcType="LONGVARBINARY" property="projectPicture" />
+  </resultMap>
+
+  <resultMap id="TimelineMap" type="com.quarkdata.data.model.dataobj.ProjectTimeline">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="project_id" jdbcType="BIGINT" property="projectId" />
+    <result column="tenant_id" jdbcType="BIGINT" property="tenantId" />
+    <result column="operate_type" jdbcType="CHAR" property="operateType" />
+    <result column="operate_object_parent_type" jdbcType="CHAR" property="operateObjectParentType" />
+    <result column="operate_object_type" jdbcType="CHAR" property="operateObjectType" />
+    <result column="operate_object_id" jdbcType="BIGINT" property="operateObjectId" />
+    <result column="operate_object_name" jdbcType="VARCHAR" property="operateObjectName" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="create_user" jdbcType="BIGINT" property="createUser" />
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    id, tenant_id, project_name, project_key, project_status, project_info, is_del, create_time,
+    update_time, create_user, update_user
+  </sql>
+
+  <sql id="Blob_Column_List">
+    project_desc, project_picture
+  </sql>
+
+  <sql id="Comment_List">
+    id, project_id, tenant_id, create_time, create_user
+  </sql>
+
+  <sql id="Blob_Comment_List">
+    comment
+  </sql>
+
+  <update id="updateByParameter" parameterType="map">
+    update project
+    <set>
+      <if test="projectName != null">
+        project_name = #{projectName,jdbcType=VARCHAR},
+      </if>
+      <if test="projectInfo != null">
+        project_info = #{projectInfo,jdbcType=VARCHAR},
+      </if>
+      <if test="projectDesc != null">
+        project_desc = #{projectDesc,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="projectStatus != null">
+        project_status = #{projectStatus,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateUser != null">
+        update_user = #{updateUser,jdbcType=BIGINT},
+      </if>
+      <if test="updateTime != null">
+        update_time = #{updateTime,jdbcType=TIMESTAMP}
+      </if>
+    </set>
+    where id = #{projectId,jdbcType=BIGINT} and tenant_id = #{tenantId,jdbcType=BIGINT}
+  </update>
+
+  <select id="selectProject" parameterType="map" resultMap="ResultMapWithBLOBs">
+    select
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from project where id = #{projectId,jdbcType=BIGINT} and tenant_id = #{tenantId,jdbcType=BIGINT}
+  </select>
+
+  <select id="countTask" parameterType="map" resultType="java.lang.Long">
+    select count(*) from scheduler_task
+    where scheduler_job_id in (select id from scheduler_job where tenant_id = #{tenantId,jdbcType=BIGINT})
+    and project_id = #{projectId,jdbcType=BIGINT};
+  </select>
+
+  <select id="getList" parameterType="map" resultMap="ResultMapWithBLOBs">
+    select
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from
+    project
+    where
+    tenant_id = #{tenantId,jdbcType=BIGINT}
+    and
+    is_del = '0'
+    <if test="tag != null and tag.length != 0">
+      and id in (select project_id from project_tag_rel where tag_id in
+      <foreach collection="tag" index="index" item="item" open="(" separator="," close=")">
+        #{item}
+      </foreach>
+      and tag_id in (select id from project_tag where tenant_id = #{tenantId,jdbcType=BIGINT})
+      )
+    </if>
+    <if test="filter != null and filter.trim() != ''">
+      and (project_name like concat('%',#{filter},'%') or project_info like concat('%',#{filter},'%'))
+    </if>
+    <if test="status != null and status.length != 0">
+      and project_status in 
+      <foreach collection="status" index="index" item="item" open="(" separator="," close=")">
+        #{item}
+      </foreach>
+    </if>
+    <if test="user != null and user.length != 0">
+      and create_user in
+      <foreach collection="user" index="index" item="item" open="(" separator="," close=")">
+        #{item}
+      </foreach>
+    </if>
+
+    <choose>
+      <when test="sortType == null or sortType == 0">order by CONVERT( project_name USING gbk ) COLLATE gbk_chinese_ci</when>
+      <when test="sortType == 1">order by create_time</when>
+      <when test="sortType == 2">order by update_time</when>
+      <when test="sortType == 3">order by project_status</when>
+    </choose>
+    <choose>
+      <when test="sortMethod == 0">asc</when>
+      <when test="sortMethod == 1">desc</when>
+    </choose>
+  </select>
+
+  <select id="getCommentList" parameterType="map" resultType="com.quarkdata.data.model.dataobj.ProjectComment">
+    select * from project_comment where project_id = #{projectId,jdbcType=BIGINT} and tenant_id = #{tenantId,jdbcType=BIGINT} order by create_time desc ;
+  </select>
+
+  <select id="getTimelineList" parameterType="map" resultType="com.quarkdata.data.model.dataobj.ProjectTimeline">
+    select * from project_timeline where project_id = #{projectId,jdbcType=BIGINT} and tenant_id = #{tenantId,jdbcType=BIGINT};
+  </select>
+
+  <select id="getProjectName" parameterType="map" resultType="java.lang.String">
+    select project_name from project where id = #{projectId,jdbcType=BIGINT} and tenant_id = #{tenantId,jdbcType=BIGINT};
+  </select>
+
+  <select id="getObjectTimelineList" parameterType="map" resultType="com.quarkdata.data.model.dataobj.ProjectTimeline">
+    select * from project_timeline
+    where project_id = #{projectId,jdbcType=BIGINT}
+    and tenant_id = #{tenantId,jdbcType=BIGINT}
+    <if test="objectParentType != null">
+      and
+      operate_object_parent_type = #{objectParentType,jdbcType=CHAR}
+    </if>
+    <if test="objectId != null">
+      and
+      operate_object_id = #{objectId,jdbcType=BIGINT};
+    </if>
+    order by create_time desc ;
+  </select>
+
+  <select id="getCommentCreateDays" parameterType="map" resultType="java.lang.String">
+    select distinct SUBSTRING(create_time,1,10) as createDay from project_comment where project_id = #{projectId,jdbcType=BIGINT} and tenant_id = #{tenantId,jdbcType=BIGINT} order by createDay desc ;
+  </select>
+
+  <select id="getOneGroupComment" parameterType="map" resultType="com.quarkdata.data.model.dataobj.ProjectComment">
+    select * from project_comment where project_id = #{projectId,jdbcType=BIGINT} and tenant_id = #{tenantId,jdbcType=BIGINT}
+    <if test="createDay != null">
+      and SUBSTRING(create_time,1,10) = #{createDay}
+    </if>
+    order by create_time desc ;
+  </select>
+
+  <select id="getTimelineCreateDays" parameterType="map" resultType="java.lang.String">
+    select distinct SUBSTRING(create_time,1,10) as createDay from project_timeline
+    where project_id = #{projectId,jdbcType=BIGINT} and tenant_id = #{tenantId,jdbcType=BIGINT}
+    <if test="objectParentType != null">
+      and
+      operate_object_parent_type = #{objectParentType,jdbcType=CHAR}
+    </if>
+    <if test="objectId != null">
+      and
+      operate_object_id = #{objectId,jdbcType=BIGINT}
+    </if>
+    order by createDay desc ;
+  </select>
+
+  <select id="getOneGroupTimeline" parameterType="map" resultType="com.quarkdata.data.model.dataobj.ProjectTimeline">
+    select * from project_timeline where project_id = #{projectId,jdbcType=BIGINT} and tenant_id = #{tenantId,jdbcType=BIGINT}
+    <if test="createDay != null">
+      and SUBSTRING(create_time,1,10) = #{createDay}
+    </if>
+    <if test="objectParentType != null">
+      and
+      operate_object_parent_type = #{objectParentType,jdbcType=CHAR}
+    </if>
+    <if test="objectId != null">
+      and
+      operate_object_id = #{objectId,jdbcType=BIGINT}
+    </if>
+    order by create_time desc ;
+  </select>
+
+  <select id="getCreateuserId" parameterType="map" resultType="java.lang.Long">
+    select distinct create_user from project where tenant_id = #{tenantId,jdbcType=BIGINT} and is_del = "0";
+  </select>
+  
+  <select id="getAllProjectNameList" resultType="com.quarkdata.data.model.dataobj.Project">
+  	SELECT id id,project_name projectName
+  	FROM project
+  	WHERE is_del = '0'
+  </select>
+</mapper>

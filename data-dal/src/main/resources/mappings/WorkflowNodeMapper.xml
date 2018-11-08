@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.quarkdata.data.dal.dao.WorkflowNodeMapper">
+  <resultMap id="BaseResultMap" type="com.quarkdata.data.model.dataobj.WorkflowNode">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="workflow_id" jdbcType="BIGINT" property="workflowId" />
+    <result column="node_name" jdbcType="VARCHAR" property="nodeName" />
+    <result column="node_type" jdbcType="CHAR" property="nodeType" />
+    <result column="dataset_id" jdbcType="BIGINT" property="datasetId" />
+    <result column="dataset_type" jdbcType="CHAR" property="datasetType" />
+    <result column="node_process_type" jdbcType="CHAR" property="nodeProcessType" />
+    <result column="node_process_sub_type" jdbcType="CHAR" property="nodeProcessSubType" />
+    <result column="sql_statement" jdbcType="VARCHAR" property="sqlStatement" />
+    <result column="preprocess_json" jdbcType="VARCHAR" property="preprocessJson" />
+    <result column="is_append" jdbcType="CHAR" property="isAppend" />
+    <result column="is_del" jdbcType="CHAR" property="isDel" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    id, workflow_id, node_name, node_type, dataset_id, dataset_type, node_process_type, 
+    node_process_sub_type, sql_statement, preprocess_json, is_append, is_del, create_time, 
+    update_time
+  </sql>
+  <select id="selectByExample" parameterType="com.quarkdata.data.model.dataobj.WorkflowNodeExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from workflow_node
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+    <if test="limitStart != null and limitStart>=0">
+      limit #{limitStart} , #{limitEnd}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from workflow_node
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from workflow_node
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.quarkdata.data.model.dataobj.WorkflowNodeExample">
+    delete from workflow_node
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.quarkdata.data.model.dataobj.WorkflowNode">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Long">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into workflow_node (workflow_id, node_name, node_type, 
+      dataset_id, dataset_type, node_process_type, 
+      node_process_sub_type, sql_statement, preprocess_json, 
+      is_append, is_del, create_time, 
+      update_time)
+    values (#{workflowId,jdbcType=BIGINT}, #{nodeName,jdbcType=VARCHAR}, #{nodeType,jdbcType=CHAR}, 
+      #{datasetId,jdbcType=BIGINT}, #{datasetType,jdbcType=CHAR}, #{nodeProcessType,jdbcType=CHAR}, 
+      #{nodeProcessSubType,jdbcType=CHAR}, #{sqlStatement,jdbcType=VARCHAR}, #{preprocessJson,jdbcType=VARCHAR}, 
+      #{isAppend,jdbcType=CHAR}, #{isDel,jdbcType=CHAR}, #{createTime,jdbcType=TIMESTAMP}, 
+      #{updateTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.quarkdata.data.model.dataobj.WorkflowNode">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Long">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into workflow_node
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="workflowId != null">
+        workflow_id,
+      </if>
+      <if test="nodeName != null">
+        node_name,
+      </if>
+      <if test="nodeType != null">
+        node_type,
+      </if>
+      <if test="datasetId != null">
+        dataset_id,
+      </if>
+      <if test="datasetType != null">
+        dataset_type,
+      </if>
+      <if test="nodeProcessType != null">
+        node_process_type,
+      </if>
+      <if test="nodeProcessSubType != null">
+        node_process_sub_type,
+      </if>
+      <if test="sqlStatement != null">
+        sql_statement,
+      </if>
+      <if test="preprocessJson != null">
+        preprocess_json,
+      </if>
+      <if test="isAppend != null">
+        is_append,
+      </if>
+      <if test="isDel != null">
+        is_del,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="updateTime != null">
+        update_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="workflowId != null">
+        #{workflowId,jdbcType=BIGINT},
+      </if>
+      <if test="nodeName != null">
+        #{nodeName,jdbcType=VARCHAR},
+      </if>
+      <if test="nodeType != null">
+        #{nodeType,jdbcType=CHAR},
+      </if>
+      <if test="datasetId != null">
+        #{datasetId,jdbcType=BIGINT},
+      </if>
+      <if test="datasetType != null">
+        #{datasetType,jdbcType=CHAR},
+      </if>
+      <if test="nodeProcessType != null">
+        #{nodeProcessType,jdbcType=CHAR},
+      </if>
+      <if test="nodeProcessSubType != null">
+        #{nodeProcessSubType,jdbcType=CHAR},
+      </if>
+      <if test="sqlStatement != null">
+        #{sqlStatement,jdbcType=VARCHAR},
+      </if>
+      <if test="preprocessJson != null">
+        #{preprocessJson,jdbcType=VARCHAR},
+      </if>
+      <if test="isAppend != null">
+        #{isAppend,jdbcType=CHAR},
+      </if>
+      <if test="isDel != null">
+        #{isDel,jdbcType=CHAR},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.quarkdata.data.model.dataobj.WorkflowNodeExample" resultType="java.lang.Long">
+    select count(*) from workflow_node
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update workflow_node
+    <set>
+      <if test="record.id != null">
+        id = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.workflowId != null">
+        workflow_id = #{record.workflowId,jdbcType=BIGINT},
+      </if>
+      <if test="record.nodeName != null">
+        node_name = #{record.nodeName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.nodeType != null">
+        node_type = #{record.nodeType,jdbcType=CHAR},
+      </if>
+      <if test="record.datasetId != null">
+        dataset_id = #{record.datasetId,jdbcType=BIGINT},
+      </if>
+      <if test="record.datasetType != null">
+        dataset_type = #{record.datasetType,jdbcType=CHAR},
+      </if>
+      <if test="record.nodeProcessType != null">
+        node_process_type = #{record.nodeProcessType,jdbcType=CHAR},
+      </if>
+      <if test="record.nodeProcessSubType != null">
+        node_process_sub_type = #{record.nodeProcessSubType,jdbcType=CHAR},
+      </if>
+      <if test="record.sqlStatement != null">
+        sql_statement = #{record.sqlStatement,jdbcType=VARCHAR},
+      </if>
+      <if test="record.preprocessJson != null">
+        preprocess_json = #{record.preprocessJson,jdbcType=VARCHAR},
+      </if>
+      <if test="record.isAppend != null">
+        is_append = #{record.isAppend,jdbcType=CHAR},
+      </if>
+      <if test="record.isDel != null">
+        is_del = #{record.isDel,jdbcType=CHAR},
+      </if>
+      <if test="record.createTime != null">
+        create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.updateTime != null">
+        update_time = #{record.updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update workflow_node
+    set id = #{record.id,jdbcType=BIGINT},
+      workflow_id = #{record.workflowId,jdbcType=BIGINT},
+      node_name = #{record.nodeName,jdbcType=VARCHAR},
+      node_type = #{record.nodeType,jdbcType=CHAR},
+      dataset_id = #{record.datasetId,jdbcType=BIGINT},
+      dataset_type = #{record.datasetType,jdbcType=CHAR},
+      node_process_type = #{record.nodeProcessType,jdbcType=CHAR},
+      node_process_sub_type = #{record.nodeProcessSubType,jdbcType=CHAR},
+      sql_statement = #{record.sqlStatement,jdbcType=VARCHAR},
+      preprocess_json = #{record.preprocessJson,jdbcType=VARCHAR},
+      is_append = #{record.isAppend,jdbcType=CHAR},
+      is_del = #{record.isDel,jdbcType=CHAR},
+      create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      update_time = #{record.updateTime,jdbcType=TIMESTAMP}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.quarkdata.data.model.dataobj.WorkflowNode">
+    update workflow_node
+    <set>
+      <if test="workflowId != null">
+        workflow_id = #{workflowId,jdbcType=BIGINT},
+      </if>
+      <if test="nodeName != null">
+        node_name = #{nodeName,jdbcType=VARCHAR},
+      </if>
+      <if test="nodeType != null">
+        node_type = #{nodeType,jdbcType=CHAR},
+      </if>
+      <if test="datasetId != null">
+        dataset_id = #{datasetId,jdbcType=BIGINT},
+      </if>
+      <if test="datasetType != null">
+        dataset_type = #{datasetType,jdbcType=CHAR},
+      </if>
+      <if test="nodeProcessType != null">
+        node_process_type = #{nodeProcessType,jdbcType=CHAR},
+      </if>
+      <if test="nodeProcessSubType != null">
+        node_process_sub_type = #{nodeProcessSubType,jdbcType=CHAR},
+      </if>
+      <if test="sqlStatement != null">
+        sql_statement = #{sqlStatement,jdbcType=VARCHAR},
+      </if>
+      <if test="preprocessJson != null">
+        preprocess_json = #{preprocessJson,jdbcType=VARCHAR},
+      </if>
+      <if test="isAppend != null">
+        is_append = #{isAppend,jdbcType=CHAR},
+      </if>
+      <if test="isDel != null">
+        is_del = #{isDel,jdbcType=CHAR},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.quarkdata.data.model.dataobj.WorkflowNode">
+    update workflow_node
+    set workflow_id = #{workflowId,jdbcType=BIGINT},
+      node_name = #{nodeName,jdbcType=VARCHAR},
+      node_type = #{nodeType,jdbcType=CHAR},
+      dataset_id = #{datasetId,jdbcType=BIGINT},
+      dataset_type = #{datasetType,jdbcType=CHAR},
+      node_process_type = #{nodeProcessType,jdbcType=CHAR},
+      node_process_sub_type = #{nodeProcessSubType,jdbcType=CHAR},
+      sql_statement = #{sqlStatement,jdbcType=VARCHAR},
+      preprocess_json = #{preprocessJson,jdbcType=VARCHAR},
+      is_append = #{isAppend,jdbcType=CHAR},
+      is_del = #{isDel,jdbcType=CHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <select id="selectForUpdate" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from workflow_node
+    where id = #{id,jdbcType=BIGINT} for update
+  </select>
+</mapper>

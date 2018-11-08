@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.quarkdata.data.dal.dao.RunningLogMapper2">
+  <resultMap id="BaseResultMap" type="com.quarkdata.data.model.dataobj.RunningLog">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="type" jdbcType="CHAR" property="type" />
+    <result column="type_id" jdbcType="BIGINT" property="typeId" />
+    <result column="father_type_id" jdbcType="INTEGER" property="fatherTypeId" />
+    <result column="node_id" jdbcType="BIGINT" property="nodeId" />
+  </resultMap>
+
+  <update id="updateLogContent"  parameterType="map">
+    UPDATE running_log SET log_content=#{logContent} WHERE type_id=#{typeId}
+  </update>
+  <delete id="deleteRunningLog" parameterType="map">
+    DELETE from running_log WHERE type=#{type} AND type_id=#{typeId}
+  </delete>
+</mapper>

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<parent>
+		<artifactId>data</artifactId>
+		<groupId>com.quarkdata</groupId>
+		<version>1.0-SNAPSHOT</version>
+	</parent>
+	<modelVersion>4.0.0</modelVersion>
+
+	<artifactId>data-web-api</artifactId>
+	<packaging>war</packaging>
+
+	<dependencies>
+
+		<!-- local dependency -->
+		  <dependency>
+			<groupId>com.quarkdata</groupId>
+			<artifactId>data-model</artifactId>
+			<version>1.0-SNAPSHOT</version>
+		</dependency> 
+		<dependency>
+			<groupId>com.quarkdata</groupId>
+			<artifactId>data-service</artifactId>
+			<version>1.0-SNAPSHOT</version>
+		</dependency>
+	    
+	    <dependency>
+	        <groupId>com.quarkdata</groupId>
+	        <artifactId>data-dal</artifactId>
+        	<version>1.0-SNAPSHOT</version>
+	    </dependency>
+	    <dependency>
+	        <groupId>com.quarkdata</groupId>
+	        <artifactId>data-util</artifactId>
+        	<version>1.0-SNAPSHOT</version>
+	    </dependency>
+
+	</dependencies>
+
+	<profiles>
+
+		
+		<profile>
+			<id>product</id>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<executions>
+							<execution>
+								<phase>test</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<tasks>
+										<delete file="${project.build.outputDirectory}/config/config.properties"/>
+										<move file="${project.build.outputDirectory}/config/product/config.properties"
+											  tofile="${project.build.outputDirectory}/config/config.properties"/>
+
+										<delete file="${project.build.outputDirectory}/log4j.properties"/>
+										<move file="${project.build.outputDirectory}/config/product/log4j.properties"
+											  tofile="${project.build.outputDirectory}/log4j.properties"/>
+									</tasks>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
+		<profile>
+			<id>test</id>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<executions>
+							<execution>
+								<phase>test</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<tasks>
+										<delete file="${project.build.outputDirectory}/config/config.properties"/>
+										<move file="${project.build.outputDirectory}/config/test/config.properties"
+											  tofile="${project.build.outputDirectory}/config/config.properties"/>
+
+										<delete file="${project.build.outputDirectory}/log4j.properties"/>
+										<move file="${project.build.outputDirectory}/config/test/log4j.properties"
+											  tofile="${project.build.outputDirectory}/log4j.properties"/>
+									</tasks>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
+
+</project>

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+        PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+
+<generatorConfiguration>
+    <!--数据库驱动 -->
+    <classPathEntry location="./mysql-connector-java-5.1.26-bin.jar" />
+
+    <context id="MySQLTables" targetRuntime="MyBatis3">
+        <!--是否覆盖xml文件: false 覆盖 true:追加 -->
+        <property name="mergeable" value="false"></property>
+        <!--分页插件-->
+        <plugin type="org.mybatis.generator.plugins.PaginationPlugin"/>
+        <!--实现model example 以及内部类序列化插件-->
+        <plugin type="org.mybatis.generator.plugins.SerializablePlugin2"/>
+        <!--重写equals 、 hashCode-->
+        <plugin type="org.mybatis.generator.plugins.EqualsHashCodePlugin"/>
+        <!--重写 toString-->
+        <plugin type="org.mybatis.generator.plugins.ToStringPlugin"/>
+
+        <commentGenerator>
+            <property name="suppressAllComments" value="true" /><!-- 是否取消注释 -->
+            <property name="suppressDate" value="false" /> <!-- 是否生成注释代时间戳 -->
+        </commentGenerator>
+        <!-- 数据库连接信息 -->
+        <jdbcConnection driverClass="com.mysql.jdbc.Driver"
+                        connectionURL="jdbc:mysql://192.168.204.26:3306/one_data?useUnicode=true&amp;characterEncoding=UTF-8&amp;autoReconnect=true&amp;autoReconnectForPools=true&amp;zeroDateTimeBehavior=convertToNull"
+                        userId="root"
+                        password="lkLdgWL2tlJIovHS123">
+        </jdbcConnection>
+
+        <!-- 只有一个属于forceBigDecimals，默认false。 如果字段精确超过0，生成BigDecimal 如果字段精确是0，总长度10-18生成Long;如果字段精确是0，
+            总长5-9生成Integer; 如果字段精确是0，总长小于5生成Short; 如果forceBigDecimals为true,统一生成BigDecimal -->
+        <javaTypeResolver>
+            <!-- 是否使用bigDecimal， false可自动转化以下类型（Long, Integer, Short, etc.） -->
+            <property name="forceBigDecimals" value="false" />
+        </javaTypeResolver>
+
+        <!--生成 Model.java文件 -->
+        <javaModelGenerator targetPackage="com.quarkdata.data.model.dataobj"
+                            targetProject="../../data-model/src/main/java">
+            <!-- enableSubPackages:是否让schema作为包的后缀 -->
+            <property name="enableSubPackages" value="false" />
+            <!-- 是否针对string类型的字段在set的时候进行trim调用 -->
+            <property name="trimStrings" value="true" />
+        </javaModelGenerator>
+
+        <!-- 生成 Mapper.xml文件 -->
+        <sqlMapGenerator targetPackage="mappings"
+                         targetProject="../src/main/resources">
+            <!-- enableSubPackages:是否让schema作为包的后缀 -->
+            <property name="enableSubPackages" value="false" />
+        </sqlMapGenerator>
+
+        <!-- 生成 Mapper.java文件，即dao层 -->
+        <javaClientGenerator type="XMLMAPPER"
+                             targetPackage="com.quarkdata.data.dal.dao"
+                             targetProject="../src/main/java">
+            <property name="enableSubPackages" value="false" />
+        </javaClientGenerator>
+
+        <!-- 待生成的数据库中的表名，生成一个表对应的Java和xml文件就需要配置这一段 -->
+        <table tableName="sys_dict" domainObjectName="SysDict">
+            <generatedKey column="id" sqlStatement="MySql" identity="true" />
+        </table>
+        <table tableName="dataset" domainObjectName="Dataset">
+            <generatedKey column="id" sqlStatement="MySql" identity="true" />
+        </table>
+        <table tableName="dataset_filter" domainObjectName="DatasetFilter">
+            <generatedKey column="id" sqlStatement="MySql" identity="true" />
+        </table>
+        <table tableName="dataset_schema" domainObjectName="DatasetSchema">
+            <generatedKey column="id" sqlStatement="MySql" identity="true" />
+        </table>
+        <table tableName="datasource" domainObjectName="Datasource">
+            <generatedKey column="id" sqlStatement="MySql" identity="true" />
+        </table>
+        <table tableName="project" domainObjectName="Project">
+            <generatedKey column="id" sqlStatement="MySql" identity="true" />
+        </table>
+        <table tableName="project_comment" domainObjectName="ProjectComment">
+            <generatedKey column="id" sqlStatement="MySql" identity="true" />
+        </table>
+        <table tableName="project_tag" domainObjectName="ProjectTag">
+            <generatedKey column="id" sqlStatement="MySql" identity="true" />
+        </table>
+        <table tableName="project_tag_rel" domainObjectName="ProjectTagRel">
+        </table>
+        <table tableName="project_timeline" domainObjectName="ProjectTimeline">
+            <generatedKey column="id" sqlStatement="MySql" identity="true" />
+        </table>
+        <table tableName="scheduler_job" domainObjectName="SchedulerJob">
+            <generatedKey column="id" sqlStatement="MySql" identity="true" />
+        </table>
+        <table tableName="scheduler_notify" domainObjectName="SchedulerNotify">
+            <generatedKey column="id" sqlStatement="MySql" identity="true" />
+        </table>
+        <table tableName="scheduler_task" domainObjectName="SchedulerTask">
+            <generatedKey column="id" sqlStatement="MySql" identity="true" />
+        </table>
+        <table tableName="workflow" domainObjectName="Workflow">
+            <generatedKey column="id" sqlStatement="MySql" identity="true" />
+        </table>
+        <table tableName="workflow_inst" domainObjectName="WorkflowInst">
+            <generatedKey column="id" sqlStatement="MySql" identity="true" />
+        </table>
+        <table tableName="workflow_node" domainObjectName="WorkflowNode">
+            <generatedKey column="id" sqlStatement="MySql" identity="true" />
+        </table>
+        <table tableName="workflow_node_inst" domainObjectName="WorkflowNodeInst">
+            <generatedKey column="id" sqlStatement="MySql" identity="true" />
+        </table>
+        <table tableName="workflow_node_rel" domainObjectName="WorkflowNodeRel">
+            <generatedKey column="id" sqlStatement="MySql" identity="true" />
+        </table>
+        <table tableName="scheduler_job_responsible" domainObjectName="SchedulerJobResponsible">
+        </table>
+        <table tableName="single_node_test_execute_log" domainObjectName="SingleNodeTestExecuteLog">
+            <generatedKey column="id" sqlStatement="MySql" identity="true" />
+        </table>
+		<table tableName="operation_log" domainObjectName="OperationLog">
+            <generatedKey column="id" sqlStatement="MySql" identity="true" />
+        </table>
+		<table tableName="running_log" domainObjectName="RunningLog">
+            <generatedKey column="id" sqlStatement="MySql" identity="true" />
+        </table>
+    </context>
+</generatorConfiguration>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.quarkdata.data.dal.dao.ScheduleJobMapper">
+	<insert id="saveJob" parameterType="com.quarkdata.data.model.common.ScheduleJob">
+		INSERT INTO
+		QRTZ_SCHEDULER_JOB (
+		job_name, job_group, clazz, job_status,
+		cron_expression, job_desc, create_user, create_time )
+		VALUES
+		(#{jobName},#{jobGroup},#{clazz},#{jobStatus},#{cronExpression},#{jobDesc},#{createUser},#{createTime})
+
+	</insert>
+	<delete id="deleteScheduler" parameterType="com.quarkdata.data.model.common.ScheduleJob">
+		DELETE from
+		QRTZ_SCHEDULER_JOB where job_name = #{jobName} and job_group =
+		#{jobGroup}
+	</delete>
+</mapper>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.quarkdata.data.dal.dao.WorkflowNodeRelMapper2">
+  <resultMap id="BaseResultMap" type="com.quarkdata.data.model.vo.WorkflowNodeRelVO">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="current_node_id" jdbcType="BIGINT" property="currentNodeId" />
+    <result column="parent_node_id" jdbcType="BIGINT" property="parentNodeId" />
+    <result column="node_name" jdbcType="BIGINT" property="nodeName" />
+    <result column="node_type" jdbcType="CHAR" property="nodeType" />
+    <result column="node_process_type" jdbcType="CHAR" property="nodeProcessType" />
+    <result column="node_process_sub_type" jdbcType="CHAR" property="nodeProcessSubType" />
+    <result column="dataset_id" jdbcType="BIGINT" property="datasetId" />
+    <result column="dataset_type" jdbcType="CHAR" property="datasetType" />
+  </resultMap>
+  <select id="getNodeRelList" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    SELECT
+	rel.current_node_id,
+	rel.parent_node_id,
+	n.node_name,
+	n.node_type,
+	n.node_process_type,
+	n.node_process_sub_type,
+	n.dataset_id,
+	n.dataset_type
+	FROM
+		workflow_node_rel rel
+	INNER JOIN workflow_node n ON rel.workflow_id = #{workflowId}
+	AND rel.current_node_id = n.id
+  </select>
+
+  <select id="getNodeRelId" parameterType="map" resultType="java.lang.Long">
+    select
+    id
+    from
+    workflow_node_rel
+    where parent_node_id in
+    (
+    select
+    id
+    from
+    workflow_node
+    where
+    workflow_id = #{workflowId}
+    and
+    dataset_id = #{datasetId}
+    and
+    is_del = "0"
+    )
+    and
+    workflow_id = #{workflowId}
+    and
+    is_del = "0"
+  </select>
+</mapper>

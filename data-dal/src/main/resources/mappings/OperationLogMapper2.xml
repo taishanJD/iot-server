@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.quarkdata.data.dal.dao.OperationLogMapper2">
+    <resultMap id="BaseResultMap" type="com.quarkdata.data.model.dataobj.OperationLog">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="operation_type" jdbcType="INTEGER" property="operationType"/>
+        <result column="operation_user" jdbcType="BIGINT" property="operationUser"/>
+        <result column="operayion_content" jdbcType="INTEGER" property="operayionContent"/>
+        <result column="operation_type_id" jdbcType="BIGINT" property="operationTypeId"/>
+        <result column="operation_date" jdbcType="TIMESTAMP" property="operationDate"/>
+    </resultMap>
+
+    <select id="getLogCreatDay" parameterType="map" resultType="java.lang.String">
+        select distinct SUBSTRING(operation_date,1,10) as createDay from operation_log
+        where operation_type = #{type} and operation_type_id = #{typeId}
+        order by createDay desc;
+    </select>
+
+    <select id="getOneGruopOperatLog" parameterType="map" resultType="com.quarkdata.data.model.dataobj.OperationLog">
+        select * from operation_log where operation_type =#{type} and operation_type_id=#{typeId}
+        <if test="createDay != null">
+            and SUBSTRING(operation_date,1,10) = #{createDay}
+        </if>
+        order by operation_date desc;
+    </select>
+
+    <delete id="deleteOperaLog" parameterType="map">
+        DELETE from operation_log where operation_type=#{type} AND operation_type_id=#{typeId}
+    </delete>
+</mapper>

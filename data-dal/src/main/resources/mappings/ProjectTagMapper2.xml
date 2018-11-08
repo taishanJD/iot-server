@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.quarkdata.data.dal.dao.ProjectTagMapper2">
+  <resultMap id="BaseResultMap" type="com.quarkdata.data.model.dataobj.ProjectTag">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="tenant_id" jdbcType="BIGINT" property="tenantId" />
+    <result column="tag_name" jdbcType="VARCHAR" property="tagName" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, tag_name
+  </sql>
+  <select id="selectTagByProjectId" parameterType="map" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from project_tag where id in (select tag_id from project_tag_rel where project_id = #{projectId,jdbcType=BIGINT}) and tenant_id = #{tenantId,jdbcType=BIGINT}
+  </select>
+
+  <select id="getTagIdByProjectId" parameterType="map" resultType="java.lang.Long">
+    select tag_id from project_tag_rel where project_id = #{projectId,jdbcType=BIGINT}
+  </select>
+
+  <select id="getTagIdByTenantId" parameterType="map" resultType="java.lang.Long">
+    select id from project_tag where tenant_id = #{tenantId,jdbcType=BIGINT}
+  </select>
+
+  <select id="getTagIdByTagName" parameterType="map" resultType="java.lang.Long">
+    select id from project_tag where tenant_id = #{tenantId,jdbcType=BIGINT} and tag_name = #{tagName,jdbcType=VARCHAR}
+  </select>
+
+  <select id="getUsedTag" parameterType="map" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from project_tag where id in
+    (
+    select tag_id from project_tag_rel where project_id in
+    (
+    select id from project where project.tenant_id = #{tenantId,jdbcType=BIGINT}
+    )
+    )
+    and tenant_id = #{tenantId,jdbcType=BIGINT};
+  </select>
+
+  <select id="getAllTag" parameterType="map" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from project_tag where
+    <if test="filter != null and filter.trim() != ''">
+    tag_name like concat('%',#{filter},'%')
+    and
+    </if>
+    tenant_id = #{tenantId,jdbcType=BIGINT};
+  </select>
+</mapper>

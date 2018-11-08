@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.quarkdata.data.dal.dao.SchedulerTaskMapper">
+  <resultMap id="BaseResultMap" type="com.quarkdata.data.model.dataobj.SchedulerTask">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="scheduler_job_id" jdbcType="BIGINT" property="schedulerJobId" />
+    <result column="project_id" jdbcType="BIGINT" property="projectId" />
+    <result column="task_status" jdbcType="CHAR" property="taskStatus" />
+    <result column="start_time" jdbcType="TIMESTAMP" property="startTime" />
+    <result column="end_time" jdbcType="TIMESTAMP" property="endTime" />
+    <result column="alarm_time" jdbcType="TIMESTAMP" property="alarmTime" />
+    <result column="retry_times" jdbcType="INTEGER" property="retryTimes" />
+    <result column="is_manual" jdbcType="CHAR" property="isManual" />
+    <result column="biz_date_param" jdbcType="VARCHAR" property="bizDateParam" />
+    <result column="sys_time_param" jdbcType="VARCHAR" property="sysTimeParam" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    id, scheduler_job_id, project_id, task_status, start_time, end_time, alarm_time, 
+    retry_times, is_manual, biz_date_param, sys_time_param, create_time, update_time
+  </sql>
+  <select id="selectByExample" parameterType="com.quarkdata.data.model.dataobj.SchedulerTaskExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from scheduler_task
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+    <if test="limitStart != null and limitStart>=0">
+      limit #{limitStart} , #{limitEnd}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from scheduler_task
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from scheduler_task
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.quarkdata.data.model.dataobj.SchedulerTaskExample">
+    delete from scheduler_task
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.quarkdata.data.model.dataobj.SchedulerTask">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Long">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into scheduler_task (scheduler_job_id, project_id, task_status, 
+      start_time, end_time, alarm_time, 
+      retry_times, is_manual, biz_date_param, 
+      sys_time_param, create_time, update_time
+      )
+    values (#{schedulerJobId,jdbcType=BIGINT}, #{projectId,jdbcType=BIGINT}, #{taskStatus,jdbcType=CHAR}, 
+      #{startTime,jdbcType=TIMESTAMP}, #{endTime,jdbcType=TIMESTAMP}, #{alarmTime,jdbcType=TIMESTAMP}, 
+      #{retryTimes,jdbcType=INTEGER}, #{isManual,jdbcType=CHAR}, #{bizDateParam,jdbcType=VARCHAR}, 
+      #{sysTimeParam,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.quarkdata.data.model.dataobj.SchedulerTask">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Long">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into scheduler_task
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="schedulerJobId != null">
+        scheduler_job_id,
+      </if>
+      <if test="projectId != null">
+        project_id,
+      </if>
+      <if test="taskStatus != null">
+        task_status,
+      </if>
+      <if test="startTime != null">
+        start_time,
+      </if>
+      <if test="endTime != null">
+        end_time,
+      </if>
+      <if test="alarmTime != null">
+        alarm_time,
+      </if>
+      <if test="retryTimes != null">
+        retry_times,
+      </if>
+      <if test="isManual != null">
+        is_manual,
+      </if>
+      <if test="bizDateParam != null">
+        biz_date_param,
+      </if>
+      <if test="sysTimeParam != null">
+        sys_time_param,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="updateTime != null">
+        update_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="schedulerJobId != null">
+        #{schedulerJobId,jdbcType=BIGINT},
+      </if>
+      <if test="projectId != null">
+        #{projectId,jdbcType=BIGINT},
+      </if>
+      <if test="taskStatus != null">
+        #{taskStatus,jdbcType=CHAR},
+      </if>
+      <if test="startTime != null">
+        #{startTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="endTime != null">
+        #{endTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="alarmTime != null">
+        #{alarmTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="retryTimes != null">
+        #{retryTimes,jdbcType=INTEGER},
+      </if>
+      <if test="isManual != null">
+        #{isManual,jdbcType=CHAR},
+      </if>
+      <if test="bizDateParam != null">
+        #{bizDateParam,jdbcType=VARCHAR},
+      </if>
+      <if test="sysTimeParam != null">
+        #{sysTimeParam,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.quarkdata.data.model.dataobj.SchedulerTaskExample" resultType="java.lang.Long">
+    select count(*) from scheduler_task
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update scheduler_task
+    <set>
+      <if test="record.id != null">
+        id = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.schedulerJobId != null">
+        scheduler_job_id = #{record.schedulerJobId,jdbcType=BIGINT},
+      </if>
+      <if test="record.projectId != null">
+        project_id = #{record.projectId,jdbcType=BIGINT},
+      </if>
+      <if test="record.taskStatus != null">
+        task_status = #{record.taskStatus,jdbcType=CHAR},
+      </if>
+      <if test="record.startTime != null">
+        start_time = #{record.startTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.endTime != null">
+        end_time = #{record.endTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.alarmTime != null">
+        alarm_time = #{record.alarmTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.retryTimes != null">
+        retry_times = #{record.retryTimes,jdbcType=INTEGER},
+      </if>
+      <if test="record.isManual != null">
+        is_manual = #{record.isManual,jdbcType=CHAR},
+      </if>
+      <if test="record.bizDateParam != null">
+        biz_date_param = #{record.bizDateParam,jdbcType=VARCHAR},
+      </if>
+      <if test="record.sysTimeParam != null">
+        sys_time_param = #{record.sysTimeParam,jdbcType=VARCHAR},
+      </if>
+      <if test="record.createTime != null">
+        create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.updateTime != null">
+        update_time = #{record.updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update scheduler_task
+    set id = #{record.id,jdbcType=BIGINT},
+      scheduler_job_id = #{record.schedulerJobId,jdbcType=BIGINT},
+      project_id = #{record.projectId,jdbcType=BIGINT},
+      task_status = #{record.taskStatus,jdbcType=CHAR},
+      start_time = #{record.startTime,jdbcType=TIMESTAMP},
+      end_time = #{record.endTime,jdbcType=TIMESTAMP},
+      alarm_time = #{record.alarmTime,jdbcType=TIMESTAMP},
+      retry_times = #{record.retryTimes,jdbcType=INTEGER},
+      is_manual = #{record.isManual,jdbcType=CHAR},
+      biz_date_param = #{record.bizDateParam,jdbcType=VARCHAR},
+      sys_time_param = #{record.sysTimeParam,jdbcType=VARCHAR},
+      create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      update_time = #{record.updateTime,jdbcType=TIMESTAMP}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.quarkdata.data.model.dataobj.SchedulerTask">
+    update scheduler_task
+    <set>
+      <if test="schedulerJobId != null">
+        scheduler_job_id = #{schedulerJobId,jdbcType=BIGINT},
+      </if>
+      <if test="projectId != null">
+        project_id = #{projectId,jdbcType=BIGINT},
+      </if>
+      <if test="taskStatus != null">
+        task_status = #{taskStatus,jdbcType=CHAR},
+      </if>
+      <if test="startTime != null">
+        start_time = #{startTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="endTime != null">
+        end_time = #{endTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="alarmTime != null">
+        alarm_time = #{alarmTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="retryTimes != null">
+        retry_times = #{retryTimes,jdbcType=INTEGER},
+      </if>
+      <if test="isManual != null">
+        is_manual = #{isManual,jdbcType=CHAR},
+      </if>
+      <if test="bizDateParam != null">
+        biz_date_param = #{bizDateParam,jdbcType=VARCHAR},
+      </if>
+      <if test="sysTimeParam != null">
+        sys_time_param = #{sysTimeParam,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.quarkdata.data.model.dataobj.SchedulerTask">
+    update scheduler_task
+    set scheduler_job_id = #{schedulerJobId,jdbcType=BIGINT},
+      project_id = #{projectId,jdbcType=BIGINT},
+      task_status = #{taskStatus,jdbcType=CHAR},
+      start_time = #{startTime,jdbcType=TIMESTAMP},
+      end_time = #{endTime,jdbcType=TIMESTAMP},
+      alarm_time = #{alarmTime,jdbcType=TIMESTAMP},
+      retry_times = #{retryTimes,jdbcType=INTEGER},
+      is_manual = #{isManual,jdbcType=CHAR},
+      biz_date_param = #{bizDateParam,jdbcType=VARCHAR},
+      sys_time_param = #{sysTimeParam,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <select id="selectForUpdate" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from scheduler_task
+    where id = #{id,jdbcType=BIGINT} for update
+  </select>
+</mapper>

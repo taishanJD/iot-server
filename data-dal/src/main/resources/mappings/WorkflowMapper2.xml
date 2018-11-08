@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.quarkdata.data.dal.dao.WorkflowMapper2">
+    <resultMap id="BaseResultMap" type="com.quarkdata.data.model.vo.WorkflowExtend">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="tenant_id" jdbcType="BIGINT" property="tenantId"/>
+        <result column="project_id" jdbcType="BIGINT" property="projectId"/>
+        <result column="scheduler_job_id" jdbcType="BIGINT" property="schedulerJobId"/>
+        <result column="workflow_name" jdbcType="VARCHAR" property="workflowName"/>
+        <result column="is_depend_parent" jdbcType="CHAR" property="isDependParent"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="create_user" jdbcType="BIGINT" property="createUser"/>
+        <result column="update_user" jdbcType="BIGINT" property="updateUser"/>
+        <result column="is_del" jdbcType="CHAR" property="isDel"/>
+        <result column="job_type" jdbcType="VARCHAR" property="jobType"/>
+    </resultMap>
+    <select id="getWorkflowList" parameterType="map" resultMap="BaseResultMap">
+        SELECT
+        f.id,
+        f.workflow_name,
+        f.update_time,
+        f.scheduler_job_id,
+        f.is_depend_parent,
+        j.job_type
+        FROM
+        workflow f
+        LEFT JOIN scheduler_job j ON f.scheduler_job_id = j.id
+        WHERE
+        f.tenant_id = #{tenantId}
+        AND f.project_id = #{projectId}
+        AND f.is_del= 0
+        <if test="name != null and name != ''">
+            AND f.workflow_name LIKE '%${name}%'
+        </if>
+        limit #{limitStart},#{limitEnd}
+    </select>
+
+    <select id="getWorkflowListCount" parameterType="map" resultType="java.lang.Long">
+        SELECT
+        count(f.id)
+        FROM
+        workflow f
+        LEFT JOIN scheduler_job j ON f.scheduler_job_id = j.id
+        WHERE
+        f.tenant_id = #{tenantId}
+        AND f.project_id = #{projectId}
+        AND f.is_del= 0
+        <if test="name != null and name != ''">
+            AND f.workflow_name LIKE '%${name}%'
+        </if>
+    </select>
+</mapper>

@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.quarkdata.data.dal.dao.SingleNodeTestExecuteLogMapper2">
+  <resultMap id="BaseResultMap" type="com.quarkdata.data.model.vo.SingleNodeTestExecuteLogVO">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="tenant_id" jdbcType="BIGINT" property="tenantId" />
+    <result column="scheduler_job_id" jdbcType="BIGINT" property="schedulerJobId" />
+    <result column="workflow_node_id" jdbcType="BIGINT" property="workflowNodeId" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="status" jdbcType="CHAR" property="status" />
+    <result column="type" jdbcType="CHAR" property="type" />
+    <result column="start_time" jdbcType="TIMESTAMP" property="startTime" />
+    <result column="end_time" jdbcType="TIMESTAMP" property="endTime" />
+    <result column="retry_times" jdbcType="INTEGER" property="retryTimes" />
+    <result column="create_user" jdbcType="INTEGER" property="createUser" />
+  </resultMap>
+  <select id="getList" parameterType="map" resultMap="BaseResultMap">
+    SELECT
+	l.id,
+	l.name,
+	l.status,
+	l.type,
+	l.start_time,
+	l.end_time,
+	l.retry_times,
+	l.create_user,
+	l.create_username
+	FROM
+		`single_node_test_execute_log` l
+	WHERE
+		l.tenant_id = #{tenantId}
+	<if test="schedulerJobId != null">
+		AND l.id = #{schedulerJobId}
+	</if>
+	<if test="name != null and name != ''">
+		AND l.`name` LIKE '%${name}%'
+	</if>
+	<if test="status != null and status != ''">
+		AND l.`status` = #{status}
+	</if>
+	<if test="type != null and type != ''">
+		AND l.type = #{type}
+	</if>
+	<if test="userId != null">
+		AND l.create_user = #{userId}
+	</if>
+	ORDER BY l.id desc
+	limit #{pageNum},#{pageSize}
+  </select>
+  <select id="getListCount" parameterType="map" resultType="java.lang.Long">
+	  SELECT
+	  count(l.id)
+	  FROM
+	  `single_node_test_execute_log` l
+	  WHERE
+	  l.tenant_id = #{tenantId}
+	  <if test="schedulerJobId != null">
+		  AND l.id = #{schedulerJobId}
+	  </if>
+	  <if test="name != null and name != ''">
+		  AND l.`name` LIKE '%${name}%'
+	  </if>
+	  <if test="status != null and status != ''">
+		  AND l.`status` = #{status}
+	  </if>
+	  <if test="type != null and type != ''">
+		  AND l.type = #{type}
+	  </if>
+	  <if test="userId != null">
+		  AND l.create_user = #{userId}
+	  </if>
+
+  </select>
+	<insert id="insertSelective" parameterType="com.quarkdata.data.model.dataobj.SingleNodeTestExecuteLog" keyProperty="id" useGeneratedKeys="true">
+		insert into single_node_test_execute_log
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="tenantId != null">
+				tenant_id,
+			</if>
+			<if test="workflowNodeId != null">
+				workflow_node_id,
+			</if>
+			<if test="name != null">
+				name,
+			</if>
+			<if test="status != null">
+				status,
+			</if>
+			<if test="type != null">
+				type,
+			</if>
+			<if test="startTime != null">
+				start_time,
+			</if>
+			<if test="endTime != null">
+				end_time,
+			</if>
+			<if test="retryTimes != null">
+				retry_times,
+			</if>
+			<if test="createUser != null">
+				create_user,
+			</if>
+			<if test="createUsername != null">
+				create_username,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="tenantId != null">
+				#{tenantId,jdbcType=BIGINT},
+			</if>
+			<if test="workflowNodeId != null">
+				#{workflowNodeId,jdbcType=BIGINT},
+			</if>
+			<if test="name != null">
+				#{name,jdbcType=VARCHAR},
+			</if>
+			<if test="status != null">
+				#{status,jdbcType=CHAR},
+			</if>
+			<if test="type != null">
+				#{type,jdbcType=CHAR},
+			</if>
+			<if test="startTime != null">
+				#{startTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="endTime != null">
+				#{endTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="retryTimes != null">
+				#{retryTimes,jdbcType=INTEGER},
+			</if>
+			<if test="createUser != null">
+				#{createUser,jdbcType=BIGINT},
+			</if>
+			<if test="createUsername != null">
+				#{createUsername,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+</mapper>

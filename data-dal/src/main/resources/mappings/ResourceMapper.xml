@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.quarkdata.data.dal.dao.ResourceMapper">
+  
+  <select id="getDataSetListByTenantId" parameterType="java.util.Map" resultType="com.quarkdata.data.model.vo.SourceDataSetListVO">
+  	SELECT dataset.id datasetId,dataset.dataset_name datasetName,dataset.table_name tableName, project.id projectId, project.project_name projectName, source.datasource_type dataSourceType
+	FROM datasource source
+	RIGHT JOIN dataset dataset ON source.id = dataset.datasource_id
+	LEFT JOIN project project on dataset.project_id = project.id
+	WHERE source.tenant_id = #{tenantId}
+	<if test="type != 0 and type == 1">
+		and source.id = #{paramId}
+	</if>
+	<if test="type != 0 and type == 2">
+		and project.id = #{paramId}
+	</if>
+	<if test="paramValue != null and paramValue != ''">
+		and dataset.dataset_name like '%${paramValue}%'
+	</if>
+  </select>
+  
+  <select id="getWorkFlowListByTenantId" parameterType="java.util.Map" resultType="com.quarkdata.data.model.vo.SourceWorkflowListVO">
+  	SELECT flow.id workflowId, flow.workflow_name workflowName, pro.id projectId, pro.project_name projectName, job.job_type jobType
+	FROM workflow flow
+	LEFT JOIN project pro ON flow.project_id = pro.id
+	LEFT JOIN scheduler_job job ON flow.scheduler_job_id = job.id
+	WHERE flow.tenant_id = #{tenantId}
+	<if test="paramValue != null and paramValue != ''">
+		and flow.workflow_name like '%${paramValue}%'
+	</if>
+  </select>
+  
+  <select id="getProjectListByTenantId" parameterType="java.util.Map" resultType="com.quarkdata.data.model.vo.SourceProjectListVO">
+  	SELECT pro.id projectId, pro.project_name projectName, pro.project_picture projectPicture
+	FROM project pro
+	WHERE tenant_id = #{tenantId}
+	<if test="paramValue != null and paramValue != ''">
+		and pro.project_name like '%${paramValue}%'
+	</if>
+	AND is_del = '0'
+  </select>
+  
+  <select id="getDatesetCountInSource" parameterType="java.util.Map" resultType="java.util.Map">
+  	SELECT source.id sourceId, source.conn_name sourceName, COUNT(dataset.id) datasetNum
+	FROM datasource source
+	LEFT JOIN dataset dataset ON source.id = dataset.datasource_id
+	WHERE source.tenant_id = #{tenantId}
+	<if test="paramValue != null and paramValue != ''">
+		and dataset.dataset_name like '%${paramValue}%'
+	</if>
+	GROUP BY source.id
+  </select>
+  
+  <select id="getDatesetCountInProject" parameterType="java.util.Map" resultType="java.util.Map">
+	  <!--SELECT pro.id projectId, pro.project_name projectName, COUNT(dataset.id) datasetNum-->
+	  <!--FROM project pro-->
+	  <!--RIGHT JOIN dataset dataset ON pro.id = dataset.project_id-->
+	  <!--WHERE pro.tenant_id = #{tenantId}-->
+	  <!--<if test="paramValue != null and paramValue != ''">-->
+	  <!--and dataset.dataset_name like '%${paramValue}%'-->
+	  <!--</if>-->
+	  <!--GROUP BY dataset.project_id-->
+    SELECT p.id projectId, p.project_name projectName, COUNT(d.id) datasetNum
+    FROM project p
+    LEFT JOIN dataset d
+    ON p.id = d.project_id
+    WHERE p.is_del = '0' AND p.tenant_id = #{tenantId}
+    <if test="paramValue != null and paramValue != ''">
+	  AND d.dataset_name LIKE '%${paramValue}%'
+    </if>
+    GROUP BY p.id;
+  </select>
+  
+  <select id="getDataSetDetailById" parameterType="java.lang.Long" resultType="com.quarkdata.data.model.vo.SourceDataSetDetailVO">
+  	SELECT dataset.id datasetId, dataset.create_time createTime, dataset.create_user createUserId, dataset.update_time updateTime,
+		dataset.update_user updateUserId, pro.id projectId, pro.project_name projectName
+	FROM dataset dataset
+	LEFT JOIN project pro on dataset.project_id = pro.id
+	where dataset.id = #{dataSetId}
+  </select>
+  
+  <select id="getDataSetColumnById" parameterType="java.lang.Long" resultType="java.util.Map">
+  	SELECT sche.column_name columnName, sche.column_type columnType
+	FROM dataset_schema sche 
+	WHERE sche.dataset_id = #{dataSetId}
+  </select>
+  
+  <select id="getDataSetParentDataSet" parameterType="java.lang.Long" resultType="java.util.Map">
+  	SELECT dataset.id datasetId, dataset.dataset_name datasetName, source.id dataSourceId, source.datasource_type dataSourceType,
+		node.node_name
+	FROM workflow_node node
+	LEFT JOIN dataset dataset ON node.dataset_id = dataset.id
+	LEFT JOIN datasource source ON dataset.datasource_id = source.id
+	WHERE node.id IN (
+		SELECT noderel.parent_node_id nodeId
+		FROM workflow_node_rel noderel
+		WHERE noderel.current_node_id IN (
+				SELECT noderel.parent_node_id
+				FROM workflow_node_rel noderel
+				WHERE noderel.current_node_id IN (
+						SELECT node.id
+						FROM workflow_node node
+						WHERE node.dataset_id = #{dataSetId}
+					)
+			)
+	)
+  </select>
+  
+  <select id="getDataSetChildDataSet" parameterType="java.lang.Long" resultType="java.util.Map">
+  	SELECT dataset.id datasetId, dataset.dataset_name datasetName, source.id dataSourceId, source.datasource_type dataSourceType
+	FROM workflow_node node
+	LEFT JOIN dataset dataset ON node.dataset_id = dataset.id
+	LEFT JOIN datasource source ON dataset.datasource_id = source.id
+	WHERE node.id IN (
+		SELECT noderel.current_node_id nodeId
+		FROM workflow_node_rel noderel
+		WHERE noderel.parent_node_id IN (
+				SELECT noderel.current_node_id
+				FROM workflow_node_rel noderel
+				WHERE noderel.parent_node_id IN (
+						SELECT node.id
+						FROM workflow_node node
+						WHERE node.dataset_id = #{dataSetId}
+					)
+			)
+	)
+  </select>
+  
+  <select id="getWorkflowDetail" parameterType="java.lang.Long" resultType="com.quarkdata.data.model.vo.SourceWorkflowDetailVO">
+  	SELECT _work.id workflowId, _work.workflow_name workflowName, _work.create_time createTime, _work.create_user createUserId,
+		_work.update_time updateTime, _work.update_user updateUserId, _job.job_type jobType,count(_node.dataset_id) datasetNum
+	FROM workflow _work
+	LEFT JOIN scheduler_job _job ON _work.scheduler_job_id = _job.id
+	LEFT JOIN workflow_node _node ON _work.id = _node.workflow_id
+	WHERE _node.node_type = 0 AND _work.id = #{workflowId}
+  </select>
+  
+  <select id="getProjectDetail" parameterType="java.lang.Long" resultType="com.quarkdata.data.model.vo.SourceProjectDetailVO">
+  	SELECT pro.id projectId, pro.project_name projectName, pro.create_time createTime, pro.create_user createUserId, pro.update_time updateTime,
+		pro.update_user updateUserId,
+	GROUP_CONCAT(tag.tag_name) projectTag,
+		( SELECT count(project_id)
+			FROM dataset
+			WHERE project_id = #{projectId}
+		) datasetNum,
+		( SELECT count(project_id)
+			FROM workflow
+			WHERE project_id = #{projectId}
+		) workflowNum,
+		( SELECT count(project_id)
+			FROM scheduler_task
+			WHERE project_id = #{projectId}
+		) taskNum
+	FROM project pro
+	LEFT JOIN project_tag_rel tagrel ON pro.id = tagrel.project_id
+	LEFT JOIN project_tag tag ON tag.id = tagrel.tag_id
+	WHERE pro.id = #{projectId}
+	GROUP BY pro.id
+  </select>
+</mapper>
